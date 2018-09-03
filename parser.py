@@ -1,6 +1,9 @@
 predicates = {}
-types_objects = set()
 objects = {}
+types_objects = set()
+list_predicates = []
+conj_predicates = set()
+final_predicates = []
 
 def readDomain(domain_file):
 	file_object = open(domain_file,'r')
@@ -86,16 +89,75 @@ def readProblem(problem_file):
 				temp_obj.append(line[j])
 				continue
 
-domain_file = 'fond-pddl-problems/doors/domain.pddl'
-problem_file = 'fond-pddl-problems/doors/p01.pddl'
-parser_file = 'fond-pddl-problems/doors/parser_p01.txt'
+def writePredicates(parser_file):
+	file = open(parser_file,'w')
+	file.write('<predicates>\n')
+	n = len(final_predicates)-1
+	for i in range(0,n):
+		temp = final_predicates[i] + ','
+		file.write(temp)
+	temp = final_predicates[n] + '\n'
+	file.write(temp)
+	file.write('<\\predicates>\n')
+
+def initializeConjPredicates():
+	aux = []
+	for i in predicates:
+		temp = []
+		temp.append(i)
+		for j in predicates[i]:
+			temp.append(j)
+		list_predicates.append(temp)
+
+def calculateConjPredicates():
+	for i in objects:
+		for j in objects[i]:
+			new_conj = []
+			for k in list_predicates:
+				one = k
+				new_one = []
+				for l in one:
+					if l == i:
+						new_one.append(j)
+					else:
+						new_one.append(l)
+				new_conj.append(new_one)
+			for k in new_conj:
+				list_predicates.append(k)
+
+def conjToSetPredicates():
+	for i in list_predicates:
+		temp = i[0]
+		flag = True
+		for j in range(1,len(i)):
+			if i[j] in objects:
+				flag = False
+				continue
+			temp = temp + '_' + i[j]
+		if flag:
+			conj_predicates.add(temp)
+
+	aux = list(conj_predicates)
+	aux.sort()
+	for i in aux:
+		final_predicates.append(i)
+
 
 def initializeTypes():
 	for i in types_objects:
 		objects[i] = []
 
+domain_file = 'fond-pddl-problems/doors/domain.pddl'
+problem_file = 'fond-pddl-problems/doors/p01.pddl'
+parser_file = 'fond-pddl-problems/doors/parser_p01.txt'
+
+
 readDomain(domain_file)
 initializeTypes()
 readProblem(problem_file)
-print(predicates)
-print(objects)
+initializeConjPredicates()
+calculateConjPredicates()
+conjToSetPredicates()
+writePredicates(parser_file)
+# for i in final_predicates:
+# 	print(i)

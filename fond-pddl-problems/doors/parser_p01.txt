@@ -1,0 +1,3 @@
+<predicates>
+closed_D2,closed_D3,door-in_D2_L1,door-in_D2_L2,door-in_D2_L3,door-in_D3_L1,door-in_D3_L2,door-in_D3_L3,door-out_D2_L1,door-out_D2_L2,door-out_D2_L3,door-out_D3_L1,door-out_D3_L2,door-out_D3_L3,final-location_L1,final-location_L2,final-location_L3,hold-key,initial-location_L1,initial-location_L2,initial-location_L3,open_D2,open_D3,player-at_L1,player-at_L2,player-at_L3
+<\predicates>
