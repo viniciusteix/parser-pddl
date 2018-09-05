@@ -1,9 +1,13 @@
 predicates = {}
 objects = {}
-types_objects = set()
+
+state_initial = []
+state_goal = []
 list_predicates = []
-conj_predicates = set()
 final_predicates = []
+
+types_objects = set()
+conj_predicates = set()
 
 def readDomain(domain_file):
 	file_object = open(domain_file,'r')
@@ -60,6 +64,12 @@ def readProblem(problem_file):
 	name_obj = ''
 	count_obj = 0
 
+	initial = False
+	prop_initial = ''
+
+	goal = False
+	prop_goal = ''
+
 	for i in file_object.readlines():
 		line = i.split()
 		n = len(line)
@@ -71,9 +81,29 @@ def readProblem(problem_file):
 				continue
 			if line[j] == ')':
 				count_par = count_par - 1
+				if count_par == 1 and obj:
+					obj = False
+				if count_par == 1 and initial:
+					initial = False
+				if count_par == 1 and goal:
+					goal = False
+				if initial and count_par == 2:
+					prop_initial = prop_initial[1:]
+					state_initial.append(prop_initial)
+					prop_initial = ''
+				if goal and count_par == 2:
+					prop_goal = prop_goal[1:]
+					state_goal.append(prop_goal)
+					prop_goal = ''
 				continue
 			if line[j] == ':objects':
 				obj = True
+				continue
+			if line[j] == ':init':
+				initial = True
+				continue
+			if line[j] == ':goal':
+				goal = True
 				continue
 			if obj and line[j] == '-':
 				name_type_obj = True
@@ -88,17 +118,12 @@ def readProblem(problem_file):
 			if obj:
 				temp_obj.append(line[j])
 				continue
-
-def writePredicates(parser_file):
-	file = open(parser_file,'w')
-	file.write('<predicates>\n')
-	n = len(final_predicates)-1
-	for i in range(0,n):
-		temp = final_predicates[i] + ','
-		file.write(temp)
-	temp = final_predicates[n] + '\n'
-	file.write(temp)
-	file.write('<\\predicates>\n')
+			if initial:
+				prop_initial = prop_initial + '_' + line[j]
+				continue
+			if goal:
+				prop_goal = prop_goal + '_' + line[j]
+				continue
 
 def initializeConjPredicates():
 	aux = []
@@ -147,6 +172,39 @@ def initializeTypes():
 	for i in types_objects:
 		objects[i] = []
 
+def writePredicates(parser_file):
+	file = open(parser_file,'w')
+	file.write('<predicates>\n')
+	n = len(final_predicates)-1
+	for i in range(0,n):
+		temp = final_predicates[i] + ','
+		file.write(temp)
+	temp = final_predicates[n] + '\n'
+	file.write(temp)
+	file.write('<\\predicates>\n')
+
+def writeStateInitial(parser_file):
+	file = open(parser_file,'a+')
+	file.write('<initial>\n')
+	n = len(state_initial)-1
+	for i in range(0,n):
+		temp = state_initial[i] + ','
+		file.write(temp)
+	temp = state_initial[n] + '\n'
+	file.write(temp)
+	file.write('<\\initial>\n')
+
+def writeStateGoal(parser_file):
+	file = open(parser_file,'a+')
+	file.write('<goal>\n')
+	n = len(state_goal)-1
+	for i in range(0,n):
+		temp = state_goal[i] + ','
+		file.write(temp)
+	temp = state_goal[n] + '\n'
+	file.write(temp)
+	file.write('<\\goal>\n')
+
 domain_file = 'fond-pddl-problems/doors/domain.pddl'
 problem_file = 'fond-pddl-problems/doors/p01.pddl'
 parser_file = 'fond-pddl-problems/doors/parser_p01.txt'
@@ -159,5 +217,9 @@ initializeConjPredicates()
 calculateConjPredicates()
 conjToSetPredicates()
 writePredicates(parser_file)
+writeStateInitial(parser_file)
+writeStateGoal(parser_file)
+# print(state_initial)
+# print(state_goal)
 # for i in final_predicates:
 # 	print(i)
