@@ -7,3 +7,15 @@ player-at_L1,initial-location_L1,open_D2,open_D3,door-in_D2_L2,door-in_D3_L3,doo
 <goal>
 player-at_L3
 <\goal>
+<actionsSet>
+<action>
+<\action>
+<action>
+<\action>
+<action>
+<\action>
+<action>
+<\action>
+<action>
+<\action>
+<\actionsSet>

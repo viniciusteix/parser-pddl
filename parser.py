@@ -5,6 +5,7 @@ state_initial = []
 state_goal = []
 list_predicates = []
 final_predicates = []
+list_actions = []
 
 types_objects = set()
 conj_predicates = set()
@@ -18,6 +19,14 @@ def readDomain(domain_file):
 	name_pred = ''
 	count_pred = 0
 
+	action = False
+	name_action = ''
+	list_param = []
+	param = False
+	type_param = False
+	pre = []
+	pos = []
+
 	for i in file_object.readlines():
 		line = i.split()
 		n = len(line)
@@ -30,6 +39,18 @@ def readDomain(domain_file):
 				count_par = count_par + 1
 				continue
 			if line[j] == ')':
+				if action and count_par == 2:
+					action = False
+					action_ = []
+					action_.append(name_action)
+					action_.append(list_param)
+					action_.append(pre)
+					action_.append(pos)
+					list_actions.append(action_)
+					name_action = ''
+					list_param = []
+				if param:
+					param = False
 				if pred and count_par == 2:
 					pred = False
 				if pred and count_par == 3:
@@ -40,8 +61,18 @@ def readDomain(domain_file):
 			if line[j] == ':predicates':
 				pred = True
 				continue
+			if line[j] == ':action':
+				action = True
+				name_action = line[j+1]
+				continue
+			if line[j] == ':parameters':
+				param = True
+				continue
 			if pred and line[j] == '-':
 				name_type_pred = True
+				continue
+			if param and line[j] == '-':
+				type_param = True
 				continue
 			if name_type_pred:
 				name_type = line[j]
@@ -50,6 +81,11 @@ def readDomain(domain_file):
 					temp_pred.append(name_type)
 				name_type_pred = False
 				count_pred = 0
+				continue
+			if type_param:
+				name_type_param = line[j]
+				list_param.append(name_type_param)
+				type_param = False
 				continue
 			if pred and line[j][0] == '?':
 				count_pred = count_pred + 1
@@ -205,6 +241,15 @@ def writeStateGoal(parser_file):
 	file.write(temp)
 	file.write('<\\goal>\n')
 
+def writeActions(parser_file):
+	file = open(parser_file,'a+')
+	file.write('<actionsSet>\n')
+	for i in list_actions:
+		file.write('<action>\n')
+
+		file.write('<\\action>\n')
+	file.write('<\\actionsSet>\n')
+
 domain_file = 'fond-pddl-problems/doors/domain.pddl'
 problem_file = 'fond-pddl-problems/doors/p01.pddl'
 parser_file = 'fond-pddl-problems/doors/parser_p01.txt'
@@ -219,6 +264,12 @@ conjToSetPredicates()
 writePredicates(parser_file)
 writeStateInitial(parser_file)
 writeStateGoal(parser_file)
+writeActions(parser_file)
+print(list_actions)
+print()
+print()
+print(objects)
+
 # print(state_initial)
 # print(state_goal)
 # for i in final_predicates:
